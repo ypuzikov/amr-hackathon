@@ -23,6 +23,7 @@ from collections import defaultdict, Counter
 from nltk.parse import DependencyGraph
 from parsimonious.exceptions import ParseError
 from parsimonious.grammar import Grammar
+import codecs
 
 
 def clean_grammar_file(s):
@@ -83,7 +84,15 @@ class AMRConstant(object):
     def __eq__(self, that):
         return type(that)==type(self) and self._value==that._value
     def __hash__(self):
-        return hash(repr(self))
+        """
+        The original version breaks on the following example AMR due to a UnicodeEncodeError:
+
+        # ::tok bjørn lomborg - wikipedia , the free encyclopedia
+        (p / person :name (n / name :op1 "bjørn" :op2 "lomborg"~e.1) :op1 (o / organization :name (n2 / name :op1 "wikipedia"~e.3) :domain (e / encyclopedia~e.0,7 :arg1-of (f / free-41~e.6))))
+
+        """
+
+        return hash(self.__repr__())
 
 class AMRString(AMRConstant):
     def __str__(self, align_key='', **kwargs):
